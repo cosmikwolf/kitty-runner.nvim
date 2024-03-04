@@ -21,10 +21,7 @@ local uuid = get_uuid()
 -- default configulation values
 local default_config = {
 	runner_name = "kitty-runner-" .. uuid,
-	run_cmd = { "send-text", "--" },
-	kill_cmd = { "close-window" },
 	use_keymaps = true,
-	kitty_port = "unix:/tmp/kitty-" .. uuid,
 	kitty_password = "",
 	use_password = false,
 	mode = "os-window",
@@ -32,10 +29,7 @@ local default_config = {
 
 local window_config = {
 	runner_name = "kitty-runner-" .. uuid,
-	run_cmd = { "send-text", "--match=title:" .. "kitty-runner-" .. uuid },
-	kill_cmd = { "close-window", "--match=title:" .. "kitty-runner-" .. uuid },
 	use_keymaps = true,
-	kitty_port = "unix:/tmp/kitty",
 	kitty_password = "",
 	use_password = false,
 	mode = "window",
