@@ -41,7 +41,7 @@ local function initialize_commands()
 		{ bang = true }
 	)
 	vim.api.nvim_create_user_command(
-		"KittyKillRunner",
+		"KittyCloseRunner",
 		"lua require('kitty-runner.commands').close_runner()",
 		{ bang = true }
 	)
@@ -53,7 +53,6 @@ local function initialize_commands()
 end
 
 local function initialize(opts)
-	vim.notify("Launching Kitty Runner")
 	-- update config
 	Config.update(opts)
 
@@ -61,7 +60,7 @@ local function initialize(opts)
 	if vim.g.kitty_runner["use_keymaps"] == true then
 		Config.define_keymaps()
 	end
-	vim.notify(vim.inspect(vim.g.kitty_runner))
+	-- vim.notify(vim.inspect(vim.g.kitty_runner))
 	-- setting up commands
 	initialize_commands()
 end

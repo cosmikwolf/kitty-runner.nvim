@@ -11,6 +11,7 @@ local M = {}
 -- Default: window Choices: background, clipboard, os-window, overlay, overlay-main, primary, tab, window
 
 local default_config = {
+	runner_name = "Kittenvim",
 	persist_across_vim_relaunch = true,
 	focus_on_send = true,
 	use_keymaps = true,
@@ -43,7 +44,7 @@ M.define_keymaps = function()
 			"Re-run last sent command in runner",
 		},
 		k = {
-			"<cmd>KittyKillRunner<cr>",
+			"<cmd>KittyCloseRunner<cr>",
 			"Close runner",
 		},
 	}, { prefix = "<leader>k", name = "Kitty Runner" })

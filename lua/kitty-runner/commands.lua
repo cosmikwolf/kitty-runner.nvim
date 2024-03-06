@@ -67,7 +67,7 @@ function M.prompt_run_command()
 	Kv.open_runner_and_or_send_command(last_command, true)
 end
 
-function M.kill_runner()
+function M.close_runner()
 	Kv.send_close_window()
 end
 

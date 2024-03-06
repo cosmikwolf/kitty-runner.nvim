@@ -2,12 +2,11 @@
 -- KITTY RUNNER
 --
 
-local config = vim.g.kitty_runner
 local M = {}
 
 -- but will also allow a user to relaunch vim and reconnect to the same runner
 local kitty_runner_persistance_env
-if config["persist_across_vim_relaunch"] == true then
+if vim.g.kitty_runner["persist_across_vim_relaunch"] == true then
 	-- get uuid
 	local function get_uuid()
 		local uuid_handle = io.popen([[uuidgen]])
@@ -47,8 +46,8 @@ function M.send_text_cmd(text, execute_on_send)
 	table.insert(args, "send-text")
 	table.insert(args, "--match")
 	table.insert(args, "env:" .. kitty_runner_persistance_env)
-	if config["use_password"] == true then
-		table.insert(args, "--password=" .. config["kitty_password"])
+	if vim.g.kitty_runner["use_password"] == true then
+		table.insert(args, "--password=" .. vim.g.kitty_runner["kitty_password"])
 	end
 	-- strip the trailing \r from text
 	table.insert(args, text)
@@ -58,17 +57,17 @@ function M.send_text_cmd(text, execute_on_send)
 	return args
 end
 
-function M.launch_runner()
+function M.launch_runner_cmd()
 	local args = { "kitty", "@" }
 	table.insert(args, "launch")
-	table.insert(args, "--type=" .. config["mode"])
-	table.insert(args, "--title=" .. config["runner_name"])
+	table.insert(args, "--type=" .. vim.g.kitty_runner["mode"])
+	table.insert(args, "--title=" .. vim.g.kitty_runner["runner_name"])
 	table.insert(args, "--cwd=" .. vim.fn.getcwd())
 	table.insert(args, "--keep-focus")
 	table.insert(args, "--env=" .. kitty_runner_persistance_env)
 
-	if config["use_password"] == true then
-		table.insert(args, "--password=" .. config["kitty_password"])
+	if vim.g.kitty_runner["use_password"] == true then
+		table.insert(args, "--password=" .. vim.g.kitty_runner["kitty_password"])
 	end
 	table.insert(args, "--hold")
 
@@ -77,7 +76,6 @@ end
 
 function M.check_if_runner_is_active()
 	local args = { "kitten", "@", "ls", "--match", "env:" .. kitty_runner_persistance_env }
-	vim.notify("check: " .. table.concat(args, " "), "info")
 	local response = vim.system(args, { text = true }):wait()
 	if response.code == 0 then
 		return true
@@ -106,7 +104,7 @@ end
 function M.focus_runner()
 	local args = { "kitty", "@" }
 	table.insert(args, "focus-window")
-	table.insert(args, "--match=title:" .. config["runner_name"])
+	table.insert(args, "--match=title:" .. vim.g.kitty_runner["runner_name"])
 	return args
 end
 
@@ -119,7 +117,7 @@ function M.open_runner_and_or_send_command(command, execute_cmd)
 		end)
 	else
 		-- don't send the command with the runner, so it gets printed out nicely after the command prompt is printed
-		vim.system(M.launch_runner(), function(launch_response)
+		vim.system(M.launch_runner_cmd(), function(launch_response)
 			if launch_response.code == 0 then
 				vim.system(M.send_text_cmd(command, execute_cmd), function(send_text_response)
 					if send_text_response.code ~= 0 then
@@ -138,7 +136,7 @@ function M.open_and_or_send_command_return_pid(command)
 	if M.check_if_runner_is_active() == true then
 		command_text = M.send_text_cmd(command)
 	else
-		command_text = M.launch_runner()
+		command_text = M.launch_runner_cmd()
 		table.insert(command_text, command)
 	end
 
@@ -151,7 +149,7 @@ function M.open_and_or_send_command_return_pid(command)
 end
 
 function M.send_close_window()
-	local close_window = { "kitty", "@", "close-window", '--match "env:' .. kitty_runner_persistance_env .. '"' }
+	local close_window = { "kitty", "@", "close-window", "--match", "env:" .. kitty_runner_persistance_env }
 	vim.system(close_window, function(response)
 		if response.code ~= 0 then
 			vim.notify(response.stderr, "warning")
