@@ -1,29 +1,70 @@
 --
 -- KITTY RUNNER | INIT
 --
-
-local config = require("kitty-runner.config")
-local kitty_runner = require("kitty-runner.kitty-runner")
-
 local M = {}
 
--- setup config
-M.setup = function(opts)
-  -- update config
-  config.update(opts)
+local Config = require("kitty-runner.config")
+local commands = require("kitty-runner.commands")
 
-  -- setting up commands
-  config["define_commands"]()
+vim.g.kitty_runner = vim.g.kitty_runner
 
-  -- setting up keymaps
-  if config["use_keymaps"] == true then
-    config["define_keymaps"]()
-  end
+local function initialize_commands()
+	vim.api.nvim_create_user_command(
+		"KittyReRunCommand",
+		"lua require('kitty-runner.commands').re_run_command()",
+		{ bang = true }
+	)
+	vim.api.nvim_create_user_command(
+		"KittySendText",
+		'lua require("kitty-runner.commands").send_text_from_region(vim.region(0, vim.fn.getpos("\'<"), vim.fn.getpos("\'>"), "l", false)[0], false)',
+		{ bang = true, range = 1 }
+	)
+	vim.api.nvim_create_user_command(
+		"KittyRunText",
+		'lua require("kitty-runner.commands").send_text_from_region(vim.region(0, vim.fn.getpos("\'<"), vim.fn.getpos("\'>"), "l", false)[0], true)',
+		{ bang = true, range = 1 }
+	)
+	vim.api.nvim_create_user_command(
+		"KittyRunCommand",
+		"lua require('kitty-runner.commands').prompt_run_command()",
+		{ bang = true }
+	)
+
+	vim.api.nvim_create_user_command(
+		"KittyClearRunner",
+		"lua require('kitty-runner.commands').clear_runner()",
+		{ bang = true }
+	)
+	vim.api.nvim_create_user_command(
+		"KittyOpenRunner",
+		"lua require('kitty-runner.commands').open_runner()",
+		{ bang = true }
+	)
+	vim.api.nvim_create_user_command(
+		"KittyKillRunner",
+		"lua require('kitty-runner.commands').close_runner()",
+		{ bang = true }
+	)
+	vim.api.nvim_create_user_command(
+		"KittySendTextPrompt",
+		"lua require('kitty-runner.commands').prompt_send_text()",
+		{ bang = true }
+	)
 end
 
--- get all functions that we need to run the various commands
-for name, command in pairs(kitty_runner) do
-  M[name] = command
+local function initialize(opts)
+	vim.notify("Launching Kitty Runner")
+	-- update config
+	Config.update(opts)
+
+	-- setting up keymaps
+	if vim.g.kitty_runner["use_keymaps"] == true then
+		Config.define_keymaps()
+	end
+	vim.notify(vim.inspect(vim.g.kitty_runner))
+	-- setting up commands
+	initialize_commands()
 end
 
+initialize(vim.g.kitty_runner)
 return M
