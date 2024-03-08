@@ -44,6 +44,10 @@ M.define_keymaps = function()
 			"Re-run last sent command in runner",
 		},
 		k = {
+			"<cmd>KittySendSigterm<cr>",
+			"Send SIGTERM to runner",
+		},
+		c = {
 			"<cmd>KittyCloseRunner<cr>",
 			"Close runner",
 		},

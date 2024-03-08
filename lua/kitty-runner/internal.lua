@@ -3,10 +3,13 @@
 --
 
 local M = {}
-
+require("kitty-runner.config").update()
+vim.g.kitty_runner = vim.g.kitty_runner
 -- but will also allow a user to relaunch vim and reconnect to the same runner
 local kitty_runner_persistance_env
 if vim.g.kitty_runner["persist_across_vim_relaunch"] == true then
+	kitty_runner_persistance_env = "KITTY_RUNNER=" .. vim.fn.getcwd()
+else
 	-- get uuid
 	local function get_uuid()
 		local uuid_handle = io.popen([[uuidgen]])
@@ -21,8 +24,6 @@ if vim.g.kitty_runner["persist_across_vim_relaunch"] == true then
 	end
 
 	kitty_runner_persistance_env = "KITTY_RUNNER=" .. vim.fn.getcwd() .. "-" .. get_uuid()
-else
-	kitty_runner_persistance_env = "KITTY_RUNNER=" .. vim.fn.getcwd()
 end
 
 function M.retrieve_command_from_buf_text(region)
@@ -41,6 +42,19 @@ function M.retrieve_command_from_buf_text(region)
 	return "\\e[200~" .. command .. "\\e[201~" .. "\r"
 end
 
+function M.signal_child_cmd(signal)
+	local args = { "kitty", "@" }
+	table.insert(args, "signal-child")
+	table.insert(args, "--match")
+	table.insert(args, "env:" .. kitty_runner_persistance_env)
+	if vim.g.kitty_runner["use_password"] == true then
+		table.insert(args, "--password=" .. vim.g.kitty_runner["kitty_password"])
+	end
+
+	table.insert(args, signal)
+	return args
+end
+
 function M.send_text_cmd(text, execute_on_send)
 	local args = { "kitty", "@" }
 	table.insert(args, "send-text")
@@ -57,7 +71,13 @@ function M.send_text_cmd(text, execute_on_send)
 	return args
 end
 
+function M.set_user_var_cmd(var, value)
+	local args = { "kitty", "@", "set_user_vars" }
+	table.insert(args, var .. "=" .. value)
+end
+
 function M.launch_runner_cmd()
+	vim.notify("config: " .. vim.inspect(vim.g.kitty_runner))
 	local args = { "kitty", "@" }
 	table.insert(args, "launch")
 	table.insert(args, "--type=" .. vim.g.kitty_runner["mode"])
@@ -101,7 +121,7 @@ function M.get_runner_pid()
 	end
 end
 
-function M.focus_runner()
+function M.focus_runner_cmd()
 	local args = { "kitty", "@" }
 	table.insert(args, "focus-window")
 	table.insert(args, "--match=title:" .. vim.g.kitty_runner["runner_name"])
