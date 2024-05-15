@@ -7,11 +7,11 @@ local last_command
 function M.open_runner()
 	local launch_cmd = Kv.launch_runner_cmd()
 	local focus_cmd = Kv.focus_runner_cmd()
-	vim.system(focus_cmd, function(focus_response)
+	vim.system(focus_cmd, nil, function(focus_response)
 		if focus_response.code ~= 0 then
-			vim.system(launch_cmd, function(launch_response)
+			vim.system(launch_cmd, nil, function(launch_response)
 				if launch_response.code ~= 0 then
-					vim.notify(launch_response.stderr, "error")
+					vim.notify(launch_response.stderr, vim.log.levels.ERROR)
 				end
 			end)
 		end
@@ -20,17 +20,18 @@ end
 
 function M.send_sigterm()
 	local sigterm = Kv.signal_child_cmd("SIGTERM")
-	local result = vim.system(sigterm)
-	if result.code ~= 0 then
-		vim.notify(result.stderr, "error")
-	end
+	vim.system(sigterm, nil, function(result)
+		if result.code ~= 0 then
+			vim.notify(result.stderr, vim.log.levels.ERROR)
+		end
+	end)
 end
 
 function M.run_command_get_pid(command)
 	command = command .. "\r"
 	local pid = Kv.open_and_or_send_command_return_pid(command)
 	if pid == nil then
-		vim.notify("failed to execute command", "error")
+		vim.notify("failed to execute command", vim.log.levels.ERROR)
 	end
 	return pid
 end
@@ -42,8 +43,10 @@ end
 
 function M.runner_change_directory(path)
 	local response = M.run_command_get_pid("cd " .. path)
-	if response.code ~= 0 then
-		vim.notify(response.stderr, "error")
+	if response ~= nil then
+		if response.code ~= 0 then
+			vim.notify(response.stderr, vim.log.levels.ERROR)
+		end
 	end
 end
 
@@ -96,9 +99,9 @@ function M.close_runner()
 end
 
 function M.clear_runner()
-	vim.system(Kv.send_text_cmd("clear", true), function(send_text_response)
+	vim.system(Kv.send_text_cmd("clear", true), nil, function(send_text_response)
 		if send_text_response.code ~= 0 then
-			vim.notify(send_text_response.stderr, "error")
+			vim.notify(send_text_response.stderr, vim.log.levels.ERROR)
 		end
 	end)
 end

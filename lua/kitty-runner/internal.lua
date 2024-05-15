@@ -14,7 +14,7 @@ else
 	local function get_uuid()
 		local uuid_handle = io.popen([[uuidgen]])
 		if not uuid_handle then
-			vim.notify("could not launch uuidgen", "error")
+			vim.notify("could not launch uuidgen", vim.log.levels.ERROR)
 			return vim.fn.getcwd()
 		else
 			local uuid = uuid_handle:read("*l")
@@ -111,7 +111,7 @@ function M.get_runner_pid()
 		local ls = vim.json.decode(response.stdout)
 		local pid = ls[1].tabs[1].windows[1].foreground_processes[1].pid
 		if pid == nil then
-			vim.notify("could not obtain pid from runner\n" .. response.stdout, "error")
+			vim.notify("could not obtain pid from runner\n" .. response.stdout, vim.log.levels.ERROR)
 			return false
 		else
 			return pid
@@ -130,22 +130,22 @@ end
 
 function M.open_runner_and_or_send_command(command, execute_cmd)
 	if M.check_if_runner_is_active() == true then
-		vim.system(M.send_text_cmd(command, execute_cmd), function(send_text_response)
+		vim.system(M.send_text_cmd(command, execute_cmd), nil, function(send_text_response)
 			if send_text_response.code ~= 0 then
-				vim.notify(send_text_response.stderr, "error")
+				vim.notify(send_text_response.stderr, vim.log.levels.ERROR)
 			end
 		end)
 	else
 		-- don't send the command with the runner, so it gets printed out nicely after the command prompt is printed
-		vim.system(M.launch_runner_cmd(), function(launch_response)
+		vim.system(M.launch_runner_cmd(), nil, function(launch_response)
 			if launch_response.code == 0 then
-				vim.system(M.send_text_cmd(command, execute_cmd), function(send_text_response)
+				vim.system(M.send_text_cmd(command, execute_cmd), nil, function(send_text_response)
 					if send_text_response.code ~= 0 then
 					else
-						vim.notify(send_text_response.stderr, "error")
+						vim.notify(send_text_response.stderr, vim.log.levels.ERROR)
 					end
 				end)
-				vim.notify(launch_response.stderr, "error")
+				vim.notify(launch_response.stderr, vim.log.levels.ERROR)
 			end
 		end)
 	end
@@ -162,7 +162,7 @@ function M.open_and_or_send_command_return_pid(command)
 
 	local response = vim.system(command_text):wait()
 	if response.code ~= 0 then
-		vim.notify(response.stderr, "error")
+		vim.notify(response.stderr, vim.log.levels.ERROR)
 	else
 		return M.get_runner_pid()
 	end
@@ -170,9 +170,9 @@ end
 
 function M.send_close_window()
 	local close_window = { "kitty", "@", "close-window", "--match", "env:" .. kitty_runner_persistance_env }
-	vim.system(close_window, function(response)
+	vim.system(close_window, nil, function(response)
 		if response.code ~= 0 then
-			vim.notify(response.stderr, "warning")
+			vim.notify(response.stderr, vim.log.levels.WARN)
 		end
 	end)
 end

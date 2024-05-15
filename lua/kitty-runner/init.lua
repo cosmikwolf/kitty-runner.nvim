@@ -64,7 +64,7 @@ local function initialize(opts)
 	if vim.g.kitty_runner["use_keymaps"] == true then
 		Config.define_keymaps()
 	end
-	vim.notify(vim.inspect(vim.g.kitty_runner))
+	-- vim.notify(vim.inspect(vim.g.kitty_runner))
 	-- setting up commands
 	initialize_commands()
 	return vim.g.kitty_runner
