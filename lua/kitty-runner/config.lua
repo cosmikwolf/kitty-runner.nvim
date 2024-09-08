@@ -30,37 +30,15 @@ end
 
 M.define_keymaps = function()
 	local wk = require("which-key")
-	wk.register({
-		o = {
-			"<cmd>KittyOpenRunner<cr>",
-			"Open a Kitty runner",
-		},
-		r = {
-			"<cmd>KittyRunCommand<cr>",
-			"Prompt for command in runner",
-		},
-		l = {
-			"<cmd>KittyReRunCommand<cr>",
-			"Re-run last sent command in runner",
-		},
-		k = {
-			"<cmd>KittySendSigterm<cr>",
-			"Send SIGTERM to runner",
-		},
-		c = {
-			"<cmd>KittyCloseRunner<cr>",
-			"Close runner",
-		},
-	}, { prefix = "<leader>k", name = "Kitty Runner" })
-	wk.register({
-		s = {
-			"<cmd>KittySendText<cr>",
-			"Prompt for text to send to runner",
-		},
-		r = {
-			"<cmd>KittyRunText<cr>",
-			"Prompt for text to send to runner",
-		},
+	wk.add({
+		{ "<leader>k", group = "Kitty Runner" },
+		{ "<leader>ko", "<cmd>KittyOpenRunner<cr>", desc = "Open a Kitty runner" },
+		{ "<leader>kr", "<cmd>KittyRunCommand<cr>", desc = "Prompt for command in runner" },
+		{ "<leader>kl", "<cmd>KittyReRunCommand<cr>", desc = "Re-run last sent command in runner" },
+		{ "<leader>kk", "<cmd>KittySendSigterm<cr>", desc = "Send SIGTERM to runner" },
+		{ "<leader>kc", "<cmd>KittyCloseRunner<cr>", desc = "Close runner" },
+		{ "<leader>ks", "<cmd>KittySendText<cr>", desc = "Prompt for text to send to runner" },
+		{ "<leader>kr", "<cmd>KittyRunText<cr>", desc = "Prompt for text to send to runner" },
 	}, { prefix = "<leader>k", name = "Kitty Runner", mode = "v" })
 end
 
